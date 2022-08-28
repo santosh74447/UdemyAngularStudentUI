@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Gender } from 'src/app/models/apiModels/gender.model';
 import { Student } from 'src/app/models/uiModels/student.model';
 import { GenderService } from 'src/app/services/gender.service';
@@ -38,8 +38,9 @@ export class ViewStudentComponent implements OnInit {
   constructor(private readonly studentService: StudentService,
     private readonly route: ActivatedRoute,
     private readonly genderService: GenderService,
-    private snackbar: MatSnackBar) {//showing notification when insert/update/delete occurs
-
+    private snackbar: MatSnackBar,//showing notification when insert/update/delete occurs
+    private router: Router //navigating to other screen / open other pages
+    ) {
   }
 
   ngOnInit(): void {
@@ -83,11 +84,48 @@ export class ViewStudentComponent implements OnInit {
         (successResponse) =>{
           this.snackbar.open('Student Updated Successfully','View Details',{
             duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
           });
           //console.log(successResponse);
         },
         (errorResponse)=>{
-          console.log(errorResponse);
+          this.snackbar.open('Error Occured while updating student details','View Details',{
+            duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
+          });
+
+        }
+
+      );
+      
+      //console.log(this.student);
+    }
+    
+    onDelete(): void{
+      //call student service to update student
+      this.studentService.deleteStudent(this.student.id)
+      .subscribe(
+        (successResponse) =>{
+          this.snackbar.open('Student Deleted Successfully','View Details',{
+            duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
+          });
+          //setting timeouts to dispaly the notificaiton and then go back to the desired page
+          setTimeout(()=>{
+          this.router.navigateByUrl('students'); //open specific page
+          
+          },2000);
+          //console.log(successResponse);
+        },
+        (errorResponse)=>{
+          this.snackbar.open('Error Occured while deleting student details','View Details',{
+            duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
+          });
 
         }
 
