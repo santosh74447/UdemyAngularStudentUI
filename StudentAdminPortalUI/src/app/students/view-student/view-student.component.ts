@@ -34,6 +34,9 @@ export class ViewStudentComponent implements OnInit {
 
   }
   genderList: Gender[] = [];
+  isNewStudent = false;
+  header = '';
+  displayProfileImageUrl = '';
 
   constructor(private readonly studentService: StudentService,
     private readonly route: ActivatedRoute,
@@ -49,17 +52,35 @@ export class ViewStudentComponent implements OnInit {
         this.studentId = params.get('id');//same name as defined in the url
 
         if(this.studentId){
+
+          //check if route action is add new student
+          if(this.studentId.toLowerCase() === 'Add'.toLowerCase()){
+
+            this.isNewStudent = true;
+            this.header = 'Add New Student';
+            this.setImage();
+          }
+          else
+          {
+            //existing other functionality
+            this.isNewStudent = false;
+            this.header = 'Update Student';
+            this.setImage();
+
           this.studentService.getSingleStudent(this.studentId)
           .subscribe(
             (successResponse) =>{
               //console.log(successResponse);
               this.student = successResponse;
+              this.setImage();
 
             },
             (errorResponse) =>{
               console.log(errorResponse);
+              this.setImage();
             }
           );
+        }
           this.genderService.getAllGender()
           .subscribe(
             (successResponse) =>{
@@ -75,6 +96,36 @@ export class ViewStudentComponent implements OnInit {
       }
     );
 
+    }
+
+    onAdd(): void{
+      //call student service to update student
+      this.studentService.addStudent(this.student)
+      .subscribe(
+        (successResponse) =>{
+          this.snackbar.open('Student Added Successfully','View Details',{
+            duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
+          });
+          setTimeout(()=>{
+            this.router.navigateByUrl(`students/${successResponse.id}`); //open specific page
+            
+            },2000);
+          //console.log(successResponse);
+        },
+        (errorResponse)=>{
+          this.snackbar.open('Error Occured while adding student details','View Details',{
+            duration:2000
+            ,verticalPosition:'bottom'
+            ,horizontalPosition:'right'
+          });
+
+        }
+
+      );
+      
+      //console.log(this.student);
     }
 
     onUpdate(): void{
@@ -132,6 +183,44 @@ export class ViewStudentComponent implements OnInit {
       );
       
       //console.log(this.student);
+    }
+
+    uploadImage(event: any): void{//event type any
+      if(this.studentId){
+        const file: File = event.target.files[0];
+        this.studentService.uploadImage(this.student.id, file)
+        .subscribe(
+          (successResponse)=>{
+            this.snackbar.open('Profile image updated successfully','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
+
+          },
+          (errorResponse)=>{
+            this.snackbar.open('Error Occured while updating profile image','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
+
+          }
+        );
+      }
+    }
+
+    setImage(): void{
+      if(this.student.profileImageUrl){
+        //fetch the image by url
+        this.displayProfileImageUrl = this.studentService.getImagePath(this.student.profileImageUrl);
+
+      }
+      else{
+        //or display default image
+        this.displayProfileImageUrl = 'assets/user.jpg';
+
+      }
     }
 
 }

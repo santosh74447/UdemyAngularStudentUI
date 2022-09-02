@@ -15,6 +15,9 @@
         [(ngModel)]="filterString"
         (keyup) = "filterStudents()">
       </mat-form-field>
+      <a mat-raised-button [routerLink]="['/students/add']" class="ml-1">
+        Add New Student
+      </a>
     </div>
 
   </div>
