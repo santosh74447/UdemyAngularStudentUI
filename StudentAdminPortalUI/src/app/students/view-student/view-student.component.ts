@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Gender } from 'src/app/models/apiModels/gender.model';
@@ -37,6 +38,7 @@ export class ViewStudentComponent implements OnInit {
   isNewStudent = false;
   header = '';
   displayProfileImageUrl = '';
+  @ViewChild('studentDetailsForm') studentDetailsForm?: NgForm;
 
   constructor(private readonly studentService: StudentService,
     private readonly route: ActivatedRoute,
@@ -45,6 +47,7 @@ export class ViewStudentComponent implements OnInit {
     private router: Router //navigating to other screen / open other pages
     ) {
   }
+  
 
   ngOnInit(): void {
     this.route.paramMap.subscribe( //geting parameter sent
@@ -99,57 +102,63 @@ export class ViewStudentComponent implements OnInit {
     }
 
     onAdd(): void{
-      //call student service to update student
-      this.studentService.addStudent(this.student)
-      .subscribe(
-        (successResponse) =>{
-          this.snackbar.open('Student Added Successfully','View Details',{
-            duration:2000
-            ,verticalPosition:'bottom'
-            ,horizontalPosition:'right'
-          });
-          setTimeout(()=>{
-            this.router.navigateByUrl(`students/${successResponse.id}`); //open specific page
-            
-            },2000);
-          //console.log(successResponse);
-        },
-        (errorResponse)=>{
-          this.snackbar.open('Error Occured while adding student details','View Details',{
-            duration:2000
-            ,verticalPosition:'bottom'
-            ,horizontalPosition:'right'
-          });
-
-        }
-
-      );
+      if(this.studentDetailsForm?.form.valid){
+        //submit data to api
       
+        //call student service to update student
+        this.studentService.addStudent(this.student)
+        .subscribe(
+          (successResponse) =>{
+            this.snackbar.open('Student Added Successfully','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
+            setTimeout(()=>{
+              this.router.navigateByUrl(`students/${successResponse.id}`); //open specific page
+              
+              },2000);
+            //console.log(successResponse);
+          },
+          (errorResponse)=>{
+            this.snackbar.open('Error Occured while adding student details','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
+
+          }
+
+        );
+      }
       //console.log(this.student);
     }
 
     onUpdate(): void{
+      if(this.studentDetailsForm?.form.valid){
+        //submit data to api
       //call student service to update student
-      this.studentService.updateStudent(this.student.id, this.student)
-      .subscribe(
-        (successResponse) =>{
-          this.snackbar.open('Student Updated Successfully','View Details',{
-            duration:2000
-            ,verticalPosition:'bottom'
-            ,horizontalPosition:'right'
-          });
-          //console.log(successResponse);
-        },
-        (errorResponse)=>{
-          this.snackbar.open('Error Occured while updating student details','View Details',{
-            duration:2000
-            ,verticalPosition:'bottom'
-            ,horizontalPosition:'right'
-          });
+        this.studentService.updateStudent(this.student.id, this.student)
+        .subscribe(
+          (successResponse) =>{
+            this.snackbar.open('Student Updated Successfully','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
+            //console.log(successResponse);
+          },
+          (errorResponse)=>{
+            this.snackbar.open('Error Occured while updating student details','View Details',{
+              duration:2000
+              ,verticalPosition:'bottom'
+              ,horizontalPosition:'right'
+            });
 
-        }
+          }
 
-      );
+        );
+      }
       
       //console.log(this.student);
     }
@@ -191,6 +200,8 @@ export class ViewStudentComponent implements OnInit {
         this.studentService.uploadImage(this.student.id, file)
         .subscribe(
           (successResponse)=>{
+            this.student.profileImageUrl = successResponse;
+            this.setImage();
             this.snackbar.open('Profile image updated successfully','View Details',{
               duration:2000
               ,verticalPosition:'bottom'
