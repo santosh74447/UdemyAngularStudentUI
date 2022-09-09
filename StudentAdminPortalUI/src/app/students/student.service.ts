@@ -5,22 +5,23 @@ import { Student } from '../models/apiModels/student.model';
 import { UpdateStudentRequestData } from '../models/apiModels/update-student-request-data.model';
 import { AddStudentRequestData } from '../models/apiModels/add-student-request-data.model';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StudentService {
 
-  private baseApiUri = 'http://192.168.1.121:45455';
+  private baseApiUrl = environment.baseApiUrl;
   constructor(private httpClient: HttpClient) { }
 
   getAllStudent():Observable<Student[]>{
-    return this.httpClient.get<Student[]>(this.baseApiUri+'/students');
+    return this.httpClient.get<Student[]>(this.baseApiUrl+'/students');
 
   }
 
   getSingleStudent(studentId: string):Observable<Student>{
-    return this.httpClient.get<Student>(this.baseApiUri+'/students/'+studentId);
+    return this.httpClient.get<Student>(this.baseApiUrl+'/students/'+studentId);
 
   }
   addStudent(studentRequestData: Student)
@@ -36,7 +37,7 @@ export class StudentService {
       physicalAddress: studentRequestData.address.physicalAddress,
       postalAddress: studentRequestData.address.postalAddress
     }
-    return this.httpClient.post<Student>(this.baseApiUri+'/students/add', addStudentRequestData)
+    return this.httpClient.post<Student>(this.baseApiUrl+'/students/add', addStudentRequestData)
 
   }
 
@@ -53,24 +54,24 @@ export class StudentService {
       physicalAddress: studentRequestData.address.physicalAddress,
       postalAddress: studentRequestData.address.postalAddress
     }
-    return this.httpClient.put<Student>(this.baseApiUri+'/students/'+studentId, updateStudentRequestData)
+    return this.httpClient.put<Student>(this.baseApiUrl+'/students/'+studentId, updateStudentRequestData)
 
   }
   deleteStudent(studentId: string)
   :Observable<Student>
   {
-    return this.httpClient.delete<Student>(this.baseApiUri+'/students/'+studentId)
+    return this.httpClient.delete<Student>(this.baseApiUrl+'/students/'+studentId)
   }
 
   uploadImage(studentId:string, file:File):Observable<any>{
     const formData = new FormData();
     formData.append("profileImage", file);
-    return this.httpClient.post(this.baseApiUri+'/students/'+studentId+'/upload-image',formData, {
+    return this.httpClient.post(this.baseApiUrl+'/students/'+studentId+'/upload-image',formData, {
       responseType: 'text' //getting response type as text not json
     });
   }
   getImagePath(relativePath: string){
-    return `${this.baseApiUri}/${relativePath}`;
+    return `${this.baseApiUrl}/${relativePath}`;
 
   }
 
